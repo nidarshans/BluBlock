@@ -1,5 +1,21 @@
 from hashlib import sha256
 
+class Node:
+    def __init__(self, data: str):
+        self.data = data
+        self.right = None
+        self.left = None
+        self.hash = ''
+    def generate_hash(self):
+        if self.right == None and self.left == None:
+            self.hash = sha256(self.data).hexdigest()
+        elif self.right == None and self.left != None:
+            self.hash = sha256(self.left.hash).hexdigest()
+        elif self.right != None and self.left == None:
+            self.hash = sha256(self.right.hash).hexdigest()
+        else:
+            self.hash = sha256(self.left.hash + self.right.hash).hexdigest()
+            
 class MerkleTree:
     def __init__(self, data: str):
         """
@@ -31,15 +47,3 @@ class MerkleTree:
         post_order(parent.left)
         post_order(parent.right)
         parent.generate_hash()
-
-class Node:
-    def __init__(self, data: str):
-        self.data = data
-        self.right = None
-        self.left = None
-        self.hash = ''
-    def generate_hash(self):
-        if self.right == None and self.left == None:
-            self.hash = sha256(self.data).hexdigest()
-        else:
-            self.hash = sha256(self.left.hash + self.right.hash).hexdigest()
