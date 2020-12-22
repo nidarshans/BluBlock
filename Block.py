@@ -1,5 +1,5 @@
 import json
-import MerkleTree
+from MerkleTree import MerkleTree
 from hashlib import sha256
 from datetime import datetime
 
@@ -12,17 +12,18 @@ class Block:
         @param previous_hash    The hash of the previous block
         """
         self.index = index
-        self.timestamp = timestamp
+        self.timestamp = timestamp.strftime("%m/%d/%Y, %H:%M:%S")
         self.previous_hash = previous_hash
         self.nonce = '0x'
         self.mtree = MerkleTree('__ROOT_NODE__')
         self.mtree_hash = ''
         self.hash = None
         for entry in data:
-            add_transaction(entry)
+            self.mtree.insert(entry)
     def generate_hash(self) -> str:
-        mtree_hash = mtree.compute_hash
-        self.hash = sha256(nonce + previous_hash + mtree_hash).hexdigest()
+        self.mtree_hash = self.mtree.compute_hash()
+        data = self.nonce + self.previous_hash + self.mtree_hash
+        self.hash = sha256(data.encode('utf-8')).hexdigest()
         return self.hash
     def add_transaction(self, data: str):
         self.mtree.insert(data)

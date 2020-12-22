@@ -8,14 +8,14 @@ class Node:
         self.hash = ''
     def generate_hash(self):
         if self.right == None and self.left == None:
-            self.hash = sha256(self.data).hexdigest()
+            self.hash = sha256(self.data.encode('utf-8')).hexdigest()
         elif self.right == None and self.left != None:
             self.hash = sha256(self.left.hash).hexdigest()
         elif self.right != None and self.left == None:
             self.hash = sha256(self.right.hash).hexdigest()
         else:
             self.hash = sha256(self.left.hash + self.right.hash).hexdigest()
-            
+
 class MerkleTree:
     def __init__(self, data: str):
         """
@@ -37,13 +37,13 @@ class MerkleTree:
             else:
                 pass
         pointer = Node(data)
+    def post_order(self, parent: Node):
+        if parent == None:
+            return
+        self.post_order(parent.left)
+        self.post_order(parent.right)
+        parent.generate_hash()
     def compute_hash(self) -> str:
         #Use post-order traversal to compute hash
-        post_order(self.root)
+        self.post_order(self.root)
         return self.root.hash
-    def post_order(self, parent: Node):
-        if root == None:
-            return
-        post_order(parent.left)
-        post_order(parent.right)
-        parent.generate_hash()
