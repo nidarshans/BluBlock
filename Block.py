@@ -22,7 +22,7 @@ class Block:
             self.mtree.insert(entry)
     def generate_hash(self) -> str:
         self.mtree_hash = self.mtree.compute_hash()
-        data = self.nonce + self.previous_hash + self.mtree_hash
+        data = self.nonce + self.previous_hash + self.mtree_hash + self.timestamp
         self.hash = sha256(data.encode('utf-8')).hexdigest()
         return self.hash
     def add_transaction(self, data: str):

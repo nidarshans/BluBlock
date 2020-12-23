@@ -14,10 +14,12 @@ class Blockchain:
         block.nonce = hex(0)
         x = 0
         block.generate_hash()
+        '''
         while not block.hash.startswith('0' * Blockchain.difficulty):
             x += 1
             block.nonce = hex(x)
             block.generate_hash()
+        '''
         return block
     def add_block(self, block: Block, proof: str) -> bool:
         """
@@ -27,10 +29,12 @@ class Blockchain:
         * The previous_hash referred in the block and the hash of a latest block
           in the chain match.
         """
-        if self.last_block.hash != block.previous_hash:
+        if self.chain[-1].hash != block.previous_hash:
             return False
-        if check_proof(block, proof) == False:
+        '''
+        if self.check_proof(block, proof) == False:
             return False
+        '''
         # block.hash = proof
         self.chain.append(block)
         Blockchain.index += 1
