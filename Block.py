@@ -16,13 +16,12 @@ class Block:
         self.previous_hash = previous_hash
         self.nonce = '0x'
         self.mtree = MerkleTree('__ROOT_NODE__')
-        self.mtree_hash = ''
         self.hash = None
         for entry in data:
             self.mtree.insert(entry)
     def generate_hash(self) -> str:
-        self.mtree_hash = self.mtree.compute_hash()
-        data = self.nonce + self.previous_hash + self.mtree_hash + self.timestamp
+        mtree_hash = self.mtree.compute_hash()
+        data = self.nonce + self.previous_hash + self.mtree.root.hash + self.timestamp
         self.hash = sha256(data.encode('utf-8')).hexdigest()
         return self.hash
     def add_transaction(self, data: str):

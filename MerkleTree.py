@@ -19,7 +19,7 @@ class Node:
 class MerkleTree:
     def __init__(self, data: str):
         """
-        A Merkle Tree is where the root is the resulting hash
+        A Merkle Tree is where the root is the resulting hash.
         The root hash is computed by computing the combined
         hash of its child nodes
                         head = hash (H1 + H2)
@@ -27,6 +27,8 @@ class MerkleTree:
             (H1 = hash (children))   (H2 = hash (children))
         """
         self.root = Node(data)
+        self.node_count = 1
+        self.node_of_last_computed_hash = 0
     def insert(self, data: str):
         pointer = self.root
         while pointer != None:
@@ -37,6 +39,7 @@ class MerkleTree:
             else:
                 pass
         pointer = Node(data)
+        self.node_count += 1
     def post_order(self, parent: Node):
         if parent == None:
             return
@@ -44,6 +47,9 @@ class MerkleTree:
         self.post_order(parent.right)
         parent.generate_hash()
     def compute_hash(self) -> str:
+        if (self.node_count == self.node_of_last_computed_hash):
+            return self.root.hash
         #Use post-order traversal to compute hash
         self.post_order(self.root)
+        self.node_of_last_computed_hash = self.node_count
         return self.root.hash
