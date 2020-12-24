@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, send_file, safe_join, abort
 from datetime import datetime
 from Blockchain import Blockchain
 import requests
@@ -19,7 +19,7 @@ def new_transaction():
     tx = request.get_json()
     print(tx)
     print(type(tx))
-    required = ['msg']#('from', 'to', 'amount', 'signature')
+    required = ['msg'] # ('from', 'to', 'amount', 'signature')
     for field in required:
         print(field)
         if not tx.get(field):
@@ -34,7 +34,15 @@ def new_transaction():
 
 @app.route('/get_chain', methods=['GET'])
 def get_chain():
-    return pickle.dumps(blockchain)
+    with open('chain.bin', 'wb') as f:
+        try:
+            pickle.dump(blockchain, f)
+        except FileNotFoundError:
+            abort(404)
+    return send_file('chain.bin',
+    mimetype = 'bin',
+    attachment_filename= 'chain.bin',
+    as_attachment = True)
 
 @app.route('/register_node', methods=['POST'])
 def register_new_node():
@@ -42,10 +50,11 @@ def register_new_node():
     if not ip:
         return 'Invalid address', 400
     peers.add(ip)
-    #return json.dumps({"length": len(blockchain.chain), "chain": })
+    return get_chain()
 
 @app.route('/mine', methods=['GET'])
 def mine():
+    blockchain.load_unconfirmed_transaction()
     index = blockchain.mine()
     if not index:
         return "No transactions to mine"
