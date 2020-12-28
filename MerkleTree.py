@@ -1,8 +1,13 @@
 from hashlib import sha256
+import json
 
 class Node:
     def __init__(self, data: str):
         self.data = data
+        try:
+            self.sig = json.loads(data)['signature']
+        except:
+            self.sig = 'default'
         self.right = None
         self.left = None
         self.hash = ''
@@ -29,17 +34,23 @@ class MerkleTree:
         self.root = Node(data)
         self.node_count = 1
         self.node_of_last_computed_hash = 0
-    def insert(self, data: str):
+    def insert(self, data: str) -> bool:
+        '''
+        Inserts based on transaction signature to avoid
+        duplicate transactions
+        '''
         pointer = self.root
+        sig = json.loads(data)['signature']
         while pointer != None:
-            if pointer.data > data:
+            if pointer.sig > sig:
                 pointer = pointer.left
-            elif pointer.data <= data:
+            elif pointer.sig < sig:
                 pointer = pointer.right
             else:
-                pass
+                return False
         pointer = Node(data)
         self.node_count += 1
+        return True
     def post_order(self, parent: Node):
         if parent == None:
             return
@@ -47,6 +58,7 @@ class MerkleTree:
         self.post_order(parent.right)
         parent.generate_hash()
     def compute_hash(self) -> str:
+        #Saves computation time
         if (self.node_count == self.node_of_last_computed_hash):
             return self.root.hash
         #Use post-order traversal to compute hash

@@ -42,15 +42,18 @@ class Blockchain:
         """
         return (block_hash.startswith('0' * Blockchain.difficulty) and
                 block_hash == block.generate_hash())
-    def load_unconfirmed_transaction(self):
+    def dump_pool(self):
         with open('tx_pool.json', 'r') as pool:
             for transaction in pool:
                 self.unconfirmed_transactions.append(transaction)
         open('tx_pool.json', 'w').close()
     def mine(self) -> int:
-        new_block = Block(Blockchain.index, self.unconfirmed_transactions,
+        new_block = Block(Blockchain.index, [],
                     datetime.now(), self.chain[-1].hash)
+        with open('tx_pool.json', 'r') as pool:
+            for transaction in pool:
+                new_block.add_transaction(transaction)
         new_block = self.proof_of_work(new_block)
         self.add_block(new_block, new_block.hash)
-        self.unconfirmed_transactions = []
+        open('tx_pool.json', 'w').close()
         return Blockchain.index - 1

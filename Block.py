@@ -17,8 +17,6 @@ class Block:
         self.nonce = '0x'
         self.mtree = MerkleTree('__ROOT_NODE__')
         self.hash = None
-        for entry in data:
-            self.mtree.insert(entry)
     def generate_hash(self) -> str:
         mtree_hash = self.mtree.compute_hash()
         data = self.nonce + self.previous_hash + self.mtree.root.hash + self.timestamp
