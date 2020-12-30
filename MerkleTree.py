@@ -65,3 +65,8 @@ class MerkleTree:
         self.post_order(self.root)
         self.node_of_last_computed_hash = self.node_count
         return self.root.hash
+    def force_compute_hash(self) -> str:
+        #Use post-order traversal to compute hash
+        self.post_order(self.root)
+        self.node_of_last_computed_hash = self.node_count
+        return self.root.hash
