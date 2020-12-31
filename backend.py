@@ -22,6 +22,19 @@ def json_reader(filename):
         for line in f:
             yield json.loads(line)
 
+def consensus():
+    global blockchain
+    longest_chain = None
+    current_len = len(blockchain.chain)
+    for node in peers:
+        bc = pickle.loads(requests.get('http://' + node + '/get_chain').content)
+        if len(bc.chain) > current_len and bc.check_chain_validity(0):
+            current_len = len(bc.chain)
+            longest_chain = bc
+        if longest_chain:
+            blockchain = longest_chain
+            return True
+        return False
 @app.route('/new_transaction', methods=['POST'])
 def new_transaction():
     tx = request.get_json()
@@ -78,6 +91,7 @@ def sync():
     ip = peers.pop()
     file = requests.get('http://' + ip + '/get_chain')
     blockchain = pickle.loads(file.content)
+    peers.add(ip)
     return 'Success'
 
 @app.route('/mine', methods=['GET'])
@@ -86,9 +100,13 @@ def mine():
     t = blockchain.mine()
     if not t[0]:
         return "No transactions to mine"
-    for ip in peers:
-        print(requests.post('http://' + ip + '/add_block', json = t[1].block_data).content)
-    return "Block {} is mined".format(t[0] - 1)
+    else:
+        cl = len(blockchain.chain)
+        consensus()
+        if cl == len(blockchain.chain):
+            for ip in peers:
+                print(requests.post('http://' + ip + '/add_block', json = t[1].block_data).content)
+        return "Block {} is mined".format(t[0] - 1)
 
 @app.route('/add_block', methods=['POST'])
 def add_block():
